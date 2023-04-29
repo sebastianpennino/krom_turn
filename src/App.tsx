@@ -1,8 +1,72 @@
-import React from "react";
+import React, { useState } from "react";
 import CharacterCard from "./components/CharacterCard";
 import { ReactComponent as KromsysLogo } from "./assets/k-logo.svg";
+import {
+  DragDropContext,
+  Draggable,
+  DropResult,
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from "react-beautiful-dnd";
+import { StrictModeDroppable as Droppable } from "./components/StrictModeDroppable";
+import { getFakeCharacterCardData, reorderArray } from "./utils/utils";
+
+const grid = 8;
+
+const getItemStyle = (
+  isDragging: boolean,
+  draggableStyle: any
+): React.CSSProperties => ({
+  // Some basic styles to make the items look a bit nicer
+  userSelect: "none",
+  padding: `${grid * 2}px`,
+  margin: `0 0 ${grid}px 0`,
+
+  // Change background colour if dragging
+  background: isDragging ? "lightgreen" : "grey",
+
+  // Styles we need to apply on draggables
+  ...draggableStyle,
+});
+
+const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
+  background: isDraggingOver ? "lightblue" : "lightgrey",
+  padding: `${grid}px`,
+  width: "100%",
+});
+
+interface Character {
+  id: string;
+  content: string;
+  name: string;
+  turnOrder: number;
+  reflexValue: number;
+  paPoints: number;
+  prPoints: number;
+}
 
 const App = () => {
+  const [characters, setItems] = useState<Character[]>(() =>
+    getFakeCharacterCardData(10)
+  );
+
+  const onDragEnd = (result: DropResult) => {
+    // Dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    const updatedItems = reorderArray(
+      characters,
+      result.source.index,
+      result.destination.index
+    );
+
+    setItems(updatedItems);
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <header className="bg-gray-800 text-white py-2 px-4 flex items-center justify-between">
@@ -32,69 +96,52 @@ const App = () => {
         </button>
       </header>
       <main className="flex-grow p-4 overflow-x-auto">
-        <CharacterCard
-          character={{
-            name: "Character 1",
-            turnOrder: 1,
-            reflexValue: 5,
-            paPoints: 2,
-            prPoints: 0,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 2",
-            turnOrder: 2,
-            reflexValue: 2,
-            paPoints: 2,
-            prPoints: 1,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 3",
-            turnOrder: 3,
-            reflexValue: 3,
-            paPoints: 2,
-            prPoints: 1,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 4",
-            turnOrder: 3,
-            reflexValue: 3,
-            paPoints: 1,
-            prPoints: 2,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 5",
-            turnOrder: 3,
-            reflexValue: 3,
-            paPoints: 1,
-            prPoints: 1,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 6",
-            turnOrder: 3,
-            reflexValue: 3,
-            paPoints: 0,
-            prPoints: 2,
-          }}
-        />
-        <CharacterCard
-          character={{
-            name: "Character 7",
-            turnOrder: 3,
-            reflexValue: 3,
-            paPoints: 1,
-            prPoints: 0,
-          }}
-        />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="droppable">
+            {(
+              provided: DroppableProvided,
+              snapshot: DroppableStateSnapshot
+            ) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={getListStyle(snapshot.isDraggingOver)}
+                className="border border-red-500 w-full"
+              >
+                {characters.map((char: Character, index: number) => (
+                  <Draggable key={char.id} draggableId={char.id} index={index}>
+                    {(
+                      provided: DraggableProvided,
+                      snapshot: DraggableStateSnapshot
+                    ) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        style={getItemStyle(
+                          snapshot.isDragging,
+                          provided.draggableProps.style
+                        )}
+                        className="border border-blue-500"
+                      >
+                        <CharacterCard
+                          character={{
+                            name: char.name,
+                            turnOrder: char.turnOrder,
+                            reflexValue: char.reflexValue,
+                            paPoints: char.paPoints,
+                            prPoints: char.prPoints,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </main>
       <footer className="bg-gray-800 text-white py-4 px-6 flex justify-between sticky bottom-0">
         <button className="bg-lime-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-1/2 mr-2">
