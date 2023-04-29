@@ -24,7 +24,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character }) => {
   const max = 2;
 
   return (
-    <div className="bg-neutral-900 rounded-lg shadow-md mb-4 flex">
+    <div className="bg-neutral-900 rounded-lg shadow-md flex">
       <div className="w-4/5 relative p-4">
         <h3 className="text-lg font-semibold mb-2">{character.name}</h3>
         <p className="absolute bottom-0 right-0 text-sm font-medium text-gray-400 p-4">

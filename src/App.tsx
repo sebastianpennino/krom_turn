@@ -19,22 +19,18 @@ const getItemStyle = (
   isDragging: boolean,
   draggableStyle: any
 ): React.CSSProperties => ({
-  // Some basic styles to make the items look a bit nicer
   userSelect: "none",
-  padding: `${grid * 2}px`,
-  margin: `0 0 ${grid}px 0`,
-
-  // Change background colour if dragging
-  background: isDragging ? "lightgreen" : "grey",
+  border: isDragging ? "1px solid rgb(31 41 55)" : "1px solid transparent",
+  borderRadius: "10px",
+  boxShadow: isDragging ? "0px 0px 6px 6px rgba(255,255,255,0.25)" : "0px 0px 0 0 rgba(0,0,0,0.3)",
 
   // Styles we need to apply on draggables
   ...draggableStyle,
 });
 
 const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
-  background: isDraggingOver ? "lightblue" : "lightgrey",
-  padding: `${grid}px`,
-  width: "100%",
+  // background: isDraggingOver ? "lightblue" : "transparent",
+  // border: isDraggingOver ? "3px dotted firebrick" : "3px solid transparent"
 });
 
 interface Character {
@@ -106,7 +102,6 @@ const App = () => {
                 {...provided.droppableProps}
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}
-                className="border border-red-500 w-full"
               >
                 {characters.map((char: Character, index: number) => (
                   <Draggable key={char.id} draggableId={char.id} index={index}>
@@ -122,7 +117,7 @@ const App = () => {
                           snapshot.isDragging,
                           provided.draggableProps.style
                         )}
-                        className="border border-blue-500"
+                        className="mb-4 transition-shadow transition-border duration-500"
                       >
                         <CharacterCard
                           character={{
@@ -144,10 +139,10 @@ const App = () => {
         </DragDropContext>
       </main>
       <footer className="bg-gray-800 text-white py-4 px-6 flex justify-between sticky bottom-0">
-        <button className="bg-lime-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-1/2 mr-2">
+        <button className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded w-1/2 mr-2">
           Shuffle
         </button>
-        <button className="bg-lime-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-1/2">
+        <button className="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded w-1/2">
           Pass Turn
         </button>
       </footer>
