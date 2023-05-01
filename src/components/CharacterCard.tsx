@@ -1,6 +1,7 @@
 import React from "react";
 
 interface Character {
+  id: string;
   name: string;
   turnOrder: number;
   reflexValue: number;
@@ -10,15 +11,17 @@ interface Character {
 
 interface CharacterCardProps {
   character: Character;
+  changePA: (id: string) => void;
+  changePR: (id: string) => void;
 }
 
-const CharacterCard: React.FC<CharacterCardProps> = ({ character }) => {
+const CharacterCard: React.FC<CharacterCardProps> = ({ character, changePA, changePR }) => {
   const handleRedClick = () => {
-    console.log("red");
+    changePA(character.id)
   };
 
   const handleBlueClick = () => {
-    console.log("blue");
+    changePR(character.id)
   };
 
   const max = 2;

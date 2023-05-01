@@ -33,10 +33,21 @@ export const getFakeCharacterCardData = (count: number) => {
   return Array.from({ length: count }, (_, k) => ({
     id: `item-${k}`,
     content: `item ${k}`,
-    name: `Character ${k+1}`,
+    name: `Character ${k + 1}`,
     turnOrder: k,
     reflexValue: getRandomIntegerInRange(1, 4),
     paPoints: getRandomIntegerInRange(0, 2),
     prPoints: getRandomIntegerInRange(0, 2),
   }));
+};
+
+export const shuffleArray = <T>(arr: T[]): T[] => {
+  const copy = [...arr];
+  for (var i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = copy[i];
+    copy[i] = copy[j];
+    copy[j] = temp;
+  }
+  return copy;
 };
