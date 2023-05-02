@@ -1,9 +1,8 @@
 import React from "react";
 
-interface Character {
+export interface Character {
   id: string;
   name: string;
-  turnOrder: number;
   reflexValue: number;
   paPoints: number;
   prPoints: number;
@@ -13,9 +12,10 @@ interface CharacterCardProps {
   character: Character;
   changePA: (id: string) => void;
   changePR: (id: string) => void;
+  disabled: boolean;
 }
 
-const CharacterCard: React.FC<CharacterCardProps> = ({ character, changePA, changePR }) => {
+const CharacterCard: React.FC<CharacterCardProps> = ({ character, changePA, changePR, disabled }) => {
   const handleRedClick = () => {
     changePA(character.id)
   };
@@ -54,10 +54,12 @@ const CharacterCard: React.FC<CharacterCardProps> = ({ character, changePA, chan
         <button
           className="flex-grow bg-red-700 rounded-l-none rounded-b-none cursor-pointer"
           onClick={handleRedClick}
+          disabled={disabled}
         ></button>
         <button
           className="flex-grow bg-blue-700 rounded-l-none rounded-t-none cursor-pointer"
           onClick={handleBlueClick}
+          disabled={disabled}
         ></button>
       </div>
     </div>

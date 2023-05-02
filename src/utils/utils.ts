@@ -31,13 +31,11 @@ export const reorderArray = <T>(
 // Fake Character Card data generator
 export const getFakeCharacterCardData = (count: number) => {
   return Array.from({ length: count }, (_, k) => ({
-    id: `item-${k}`,
-    content: `item ${k}`,
+    id: `item-${new Date().getTime().toString(36)}`,
     name: `Character ${k + 1}`,
-    turnOrder: k,
     reflexValue: getRandomIntegerInRange(1, 4),
-    paPoints: getRandomIntegerInRange(0, 2),
-    prPoints: getRandomIntegerInRange(0, 2),
+    paPoints: 0,
+    prPoints: 0,
   }));
 };
 

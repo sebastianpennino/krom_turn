@@ -1,5 +1,5 @@
 import React, { Reducer, useReducer } from "react";
-import CharacterCard from "./components/CharacterCard";
+import CharacterCard, { Character } from "./components/CharacterCard";
 import { ReactComponent as KromsysLogo } from "./assets/k-logo.svg";
 import {
   DragDropContext,
@@ -16,6 +16,7 @@ import {
   reorderArray,
   shuffleArray,
 } from "./utils/utils";
+import PlusCard from "./components/PlusCard";
 
 const getItemStyle = (
   isDragging: boolean,
@@ -37,22 +38,14 @@ const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
   // border: isDraggingOver ? "3px dotted firebrick" : "3px solid transparent"
 });
 
-interface Character {
-  id: string;
-  content: string;
-  name: string;
-  turnOrder: number;
-  reflexValue: number;
-  paPoints: number;
-  prPoints: number;
-}
-
 type AppState = {
   characters: Character[];
+  hasCombatStarted: boolean;
 };
 
 const initialState: AppState = {
-  characters: getFakeCharacterCardData(10),
+  characters: [],
+  hasCombatStarted: false,
 };
 
 export enum TurnTrackerAction {
@@ -61,6 +54,8 @@ export enum TurnTrackerAction {
   RESET_POINTS = "RESET_POINTS",
   CHANGE_PA = "CHANGE_PA",
   CHANGE_PR = "CHANGE_PR",
+  ADD_CHARACTER = "ADD_CHARACTER",
+  TOGGLE_COMBAT = "TOGGLE_COMBAT",
 }
 
 export type AppAction = {
@@ -135,6 +130,20 @@ const appReducer = (state: AppState, action: AppAction) => {
       }
       return state;
     }
+    case TurnTrackerAction.ADD_CHARACTER: {
+      const newChar = getFakeCharacterCardData(1)[0];
+      newChar.name = action.payload;
+      return {
+        ...state,
+        characters: [...state.characters, newChar],
+      };
+    }
+    case TurnTrackerAction.TOGGLE_COMBAT: {
+      return {
+        ...state,
+        hasCombatStarted: true,
+      };
+    }
   }
   throw Error("Unknown action: " + action.type);
 };
@@ -194,6 +203,20 @@ const App = () => {
     dispatch({
       type: TurnTrackerAction.SHUFFLE_CHARACTERS,
       payload: shuffledCharacters,
+    });
+  };
+
+  const addCharacter = (newName: string) => {
+    dispatch({
+      type: TurnTrackerAction.ADD_CHARACTER,
+      payload: newName,
+    });
+  };
+
+  const toggleCombat = () => {
+    dispatch({
+      type: TurnTrackerAction.TOGGLE_COMBAT,
+      payload: null,
     });
   };
 
@@ -258,19 +281,26 @@ const App = () => {
                           character={{
                             id: char.id,
                             name: char.name,
-                            turnOrder: char.turnOrder,
                             reflexValue: char.reflexValue,
                             paPoints: char.paPoints,
                             prPoints: char.prPoints,
                           }}
                           changePA={changePA}
                           changePR={changePR}
+                          disabled={!state.hasCombatStarted}
                         />
                       </div>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
+                {!state.hasCombatStarted && state.characters.length === 0 && (
+                  <p className="mb-4">
+                    Add characters by editing the name and then pressing the (+)
+                    sign, once you're over, press the start combat button
+                  </p>
+                )}
+                {!state.hasCombatStarted && <PlusCard addFn={addCharacter} />}
               </div>
             )}
           </Droppable>
@@ -279,18 +309,29 @@ const App = () => {
 
       {/* Footer */}
       <footer className="bg-stone-950 py-4 px-4 flex justify-center sticky bottom-0">
-        <button
-          className="w-1/2 px-4 py-2 text-white text-sm mr-4"
-          onClick={shuffleCharacters}
-        >
-          Shuffle Order
-        </button>
-        <button
-          className="w-1/2 px-4 py-2 text-white text-sm mr-4"
-          onClick={resetPoints}
-        >
-          Reset Points
-        </button>
+        {state.hasCombatStarted ? (
+          <>
+            <button
+              className="w-1/2 px-4 py-2 text-white text-sm mr-4"
+              onClick={shuffleCharacters}
+            >
+              Shuffle Order
+            </button>
+            <button
+              className="w-1/2 px-4 py-2 text-white text-sm mr-4"
+              onClick={resetPoints}
+            >
+              Reset Points
+            </button>
+          </>
+        ) : (
+          <button
+            className="w-full px-4 py-2 text-white text-sm"
+            onClick={toggleCombat}
+          >
+            Start Combat!
+          </button>
+        )}
       </footer>
     </div>
   );
