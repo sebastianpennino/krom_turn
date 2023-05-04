@@ -17,6 +17,7 @@ import {
   shuffleArray,
 } from "./utils/utils";
 import PlusCard from "./components/PlusCard";
+import SmallCharacterCard from "./components/SmallCharacterCard";
 
 const getItemStyle = (
   isDragging: boolean,
@@ -261,6 +262,14 @@ const App = () => {
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}
               >
+                {!state.hasCombatStarted && state.characters.length === 0 && (
+                  <p className="mb-4">
+                    Add characters by editing the name and then pressing the (+)
+                    sign, once you're over, press the start combat button
+                  </p>
+                )}
+                {!state.hasCombatStarted && <PlusCard addFn={addCharacter} />}
+
                 {state.characters.map((char: Character, index: number) => (
                   <Draggable key={char.id} draggableId={char.id} index={index}>
                     {(
@@ -277,30 +286,35 @@ const App = () => {
                         )}
                         className="mb-4 transition-shadow transition-border duration-500"
                       >
-                        <CharacterCard
-                          character={{
-                            id: char.id,
-                            name: char.name,
-                            reflexValue: char.reflexValue,
-                            paPoints: char.paPoints,
-                            prPoints: char.prPoints,
-                          }}
-                          changePA={changePA}
-                          changePR={changePR}
-                          disabled={!state.hasCombatStarted}
-                        />
+                        {state.hasCombatStarted ? (
+                          <CharacterCard
+                            character={{
+                              id: char.id,
+                              name: char.name,
+                              reflexValue: char.reflexValue,
+                              paPoints: char.paPoints,
+                              prPoints: char.prPoints,
+                            }}
+                            changePA={changePA}
+                            changePR={changePR}
+                            disabled={!state.hasCombatStarted}
+                          />
+                        ) : (
+                          <SmallCharacterCard
+                            character={{
+                              id: char.id,
+                              name: char.name,
+                              reflexValue: char.reflexValue,
+                              paPoints: char.paPoints,
+                              prPoints: char.prPoints,
+                            }}
+                          />
+                        )}
                       </div>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
-                {!state.hasCombatStarted && state.characters.length === 0 && (
-                  <p className="mb-4">
-                    Add characters by editing the name and then pressing the (+)
-                    sign, once you're over, press the start combat button
-                  </p>
-                )}
-                {!state.hasCombatStarted && <PlusCard addFn={addCharacter} />}
               </div>
             )}
           </Droppable>
