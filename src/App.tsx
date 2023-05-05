@@ -332,7 +332,7 @@ const App = () => {
               Shuffle Order
             </button>
             <button
-              className="w-1/2 px-4 py-2 text-white text-sm mr-4"
+              className="w-1/2 px-4 py-2 text-white text-sm"
               onClick={resetPoints}
             >
               Reset Points
