@@ -55,6 +55,10 @@ export enum TurnTrackerAction {
   RESET_POINTS = "RESET_POINTS",
   CHANGE_PA = "CHANGE_PA",
   CHANGE_PR = "CHANGE_PR",
+  CHANGE_LIFE = "CHANGE_LIFE",
+  CHANGE_MANA = "CHANGE_MANA",
+  RESET_SOURCES = "RESET_SOURCES",
+  CHANGE_STAMINA = "CHANGE_STAMINA",
   ADD_CHARACTER = "ADD_CHARACTER",
   TOGGLE_COMBAT = "TOGGLE_COMBAT",
 }
@@ -90,6 +94,84 @@ const appReducer = (state: AppState, action: AppAction) => {
         ...state,
         characters: newChars,
       };
+    }
+    case TurnTrackerAction.CHANGE_LIFE: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+        };
+        copyCharacter.life = copyCharacter.life - 1;
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
+    }
+    case TurnTrackerAction.CHANGE_MANA: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+        };
+        copyCharacter.mana = copyCharacter.mana - 5;
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
+    }
+    case TurnTrackerAction.CHANGE_STAMINA: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+        };
+        copyCharacter.stamina = copyCharacter.stamina - 10;
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
+    }
+    case TurnTrackerAction.RESET_SOURCES: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+          life: 0,
+          stamina: 0,
+          mana: 0,
+        };
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
     }
     case TurnTrackerAction.CHANGE_PA: {
       const foundIndex = state.characters.findIndex((char) => {
@@ -191,6 +273,34 @@ const App = () => {
     });
   };
 
+  const changeLife = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.CHANGE_LIFE,
+      payload: id,
+    });
+  };
+
+  const changeMana = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.CHANGE_MANA,
+      payload: id,
+    });
+  };
+
+  const changeStamina = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.CHANGE_STAMINA,
+      payload: id,
+    });
+  };
+
+  const resetSources = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.RESET_SOURCES,
+      payload: id,
+    });
+  };
+
   const resetPoints = () => {
     dispatch({
       type: TurnTrackerAction.RESET_POINTS,
@@ -222,7 +332,7 @@ const App = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen justify-between">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-2 bg-stone-950 sticky top-0">
         <div className="text-white">
@@ -250,7 +360,7 @@ const App = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow p-4 overflow-x-auto">
+      <main className="flex-grow p-4 overflow-x-auto pb-10">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">
             {(
@@ -294,9 +404,16 @@ const App = () => {
                               reflexValue: char.reflexValue,
                               paPoints: char.paPoints,
                               prPoints: char.prPoints,
+                              life: char.life,
+                              mana: char.mana,
+                              stamina: char.stamina,
                             }}
                             changePA={changePA}
                             changePR={changePR}
+                            changeLife={changeLife}
+                            changeMana={changeMana}
+                            changeStamina={changeStamina}
+                            resetSources={resetSources}
                             disabled={!state.hasCombatStarted}
                           />
                         ) : (
@@ -322,7 +439,7 @@ const App = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-stone-950 py-4 px-4 flex justify-center sticky bottom-0">
+      <footer className="bg-stone-950 py-4 px-4 flex justify-center">
         {state.hasCombatStarted ? (
           <>
             <button
@@ -342,6 +459,7 @@ const App = () => {
           <button
             className="w-full px-4 py-2 text-white text-sm"
             onClick={toggleCombat}
+            disabled={state.characters.length < 2}
           >
             Start Combat!
           </button>

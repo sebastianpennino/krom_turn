@@ -36,6 +36,9 @@ export const getFakeCharacterCardData = (count: number) => {
     reflexValue: getRandomIntegerInRange(1, 4),
     paPoints: 0,
     prPoints: 0,
+    life: 0,
+    mana: 0,
+    stamina: 0,
   }));
 };
 
