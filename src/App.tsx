@@ -18,6 +18,7 @@ import {
 } from "./utils/utils";
 import PlusCard from "./components/PlusCard";
 import SmallCharacterCard from "./components/SmallCharacterCard";
+import ToolBar from "./components/ToolBar";
 
 const getItemStyle = (
   isDragging: boolean,
@@ -45,8 +46,8 @@ type AppState = {
 };
 
 const initialState: AppState = {
-  characters: [],
-  hasCombatStarted: false,
+  characters: getFakeCharacterCardData(10), //[],
+  hasCombatStarted: true,
 };
 
 export enum TurnTrackerAction {
@@ -378,10 +379,15 @@ const App = () => {
                     sign, once you're over, press the start combat button
                   </p>
                 )}
-                {!state.hasCombatStarted && <PlusCard addFn={addCharacter} />}
+                {/* <PlusCard addFn={addCharacter} /> */}
+                <ToolBar />
 
                 {state.characters.map((char: Character, index: number) => (
-                  <Draggable key={char.id} draggableId={char.id} index={index}>
+                  <Draggable
+                    key={char.id}
+                    draggableId={char.id}
+                    index={index}
+                  >
                     {(
                       provided: DraggableProvided,
                       snapshot: DraggableStateSnapshot
