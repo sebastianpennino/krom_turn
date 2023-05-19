@@ -43,22 +43,27 @@ const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
 type AppState = {
   characters: Character[];
   hasCombatStarted: boolean;
+  turn: number;
 };
 
 const initialState: AppState = {
   characters: [], // getFakeCharacterCardData(10),
   hasCombatStarted: false,
+  turn: 1,
 };
 
 export enum TurnTrackerAction {
   REORDER_AFTER_DRAG = "REORDER_AFTER_DRAG",
   SHUFFLE_CHARACTERS = "SHUFFLE_CHARACTERS",
   RESET_POINTS = "RESET_POINTS",
+  INCREASE_TURN = "INCREASE_TURN",
   CHANGE_PA = "CHANGE_PA",
   CHANGE_PR = "CHANGE_PR",
   CHANGE_LIFE = "CHANGE_LIFE",
   CHANGE_MANA = "CHANGE_MANA",
   RESET_SOURCES = "RESET_SOURCES",
+  KILL_CHARACTER = "KILL_CHARACTER",
+  TOGGLE_TIMER = "TOGGLE_TIMER",
   CHANGE_STAMINA = "CHANGE_STAMINA",
   ADD_CHARACTER = "ADD_CHARACTER",
   TOGGLE_COMBAT = "TOGGLE_COMBAT",
@@ -94,6 +99,12 @@ const appReducer = (state: AppState, action: AppAction) => {
       return {
         ...state,
         characters: newChars,
+      };
+    }
+    case TurnTrackerAction.INCREASE_TURN: {
+      return {
+        ...state,
+        turn: state.turn + 1,
       };
     }
     case TurnTrackerAction.CHANGE_LIFE: {
@@ -174,6 +185,45 @@ const appReducer = (state: AppState, action: AppAction) => {
       }
       return state;
     }
+    case TurnTrackerAction.KILL_CHARACTER: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+          died: true,
+        };
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
+    }
+    case TurnTrackerAction.TOGGLE_TIMER: {
+      const foundIndex = state.characters.findIndex((char) => {
+        return char.id === action.payload;
+      });
+      if (foundIndex !== -1) {
+        const currentTimer = state.characters[foundIndex].timer;
+        const copyCharacter = {
+          ...state.characters[foundIndex],
+          timer: currentTimer > 0 ? 0 : state.turn,
+        };
+
+        const newChars = [...state.characters];
+        newChars[foundIndex] = copyCharacter;
+        return {
+          ...state,
+          characters: newChars,
+        };
+      }
+      return state;
+    }
     case TurnTrackerAction.CHANGE_PA: {
       const foundIndex = state.characters.findIndex((char) => {
         return char.id === action.payload;
@@ -233,6 +283,8 @@ const appReducer = (state: AppState, action: AppAction) => {
 };
 
 const App = () => {
+  const currentYear = new Date().getFullYear();
+
   const [state, dispatch] = useReducer<Reducer<AppState, AppAction>>(
     appReducer,
     initialState
@@ -302,6 +354,20 @@ const App = () => {
     });
   };
 
+  const killCharacter = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.KILL_CHARACTER,
+      payload: id,
+    });
+  };
+
+  const toggleTimer = (id: string) => {
+    dispatch({
+      type: TurnTrackerAction.TOGGLE_TIMER,
+      payload: id,
+    });
+  };
+
   const resetPoints = () => {
     dispatch({
       type: TurnTrackerAction.RESET_POINTS,
@@ -315,6 +381,13 @@ const App = () => {
     dispatch({
       type: TurnTrackerAction.SHUFFLE_CHARACTERS,
       payload: shuffledCharacters,
+    });
+  };
+
+  const increaseTurn = () => {
+    dispatch({
+      type: TurnTrackerAction.INCREASE_TURN,
+      payload: null,
     });
   };
 
@@ -340,7 +413,9 @@ const App = () => {
           <KromsysLogo />
         </div>
         <div>
-          <h1 className="text-sm">Kromsys Turn Tracker</h1>
+          <h1 className="text-sm">
+            Kromsys Turn Tracker {state.turn > 0 ? `(${state.turn})` : ""}
+          </h1>
         </div>
         <button className="text-white p-0">
           <svg
@@ -369,78 +444,94 @@ const App = () => {
               snapshot: DroppableStateSnapshot
             ) => (
               <>
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                style={getListStyle(snapshot.isDraggingOver)}
-              >
-                {!state.hasCombatStarted && state.characters.length === 0 && (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                >
+                  {!state.hasCombatStarted && <PlusCard addFn={addCharacter} />}
+
+                  {state.characters
+                    .filter((char: Character) => !char.died)
+                    .map((char: Character, index: number) => (
+                      <Draggable
+                        key={char.id}
+                        draggableId={char.id}
+                        index={index}
+                      >
+                        {(
+                          provided: DraggableProvided,
+                          snapshot: DraggableStateSnapshot
+                        ) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={getItemStyle(
+                              snapshot.isDragging,
+                              provided.draggableProps.style
+                            )}
+                            className="mb-4 transition-shadow transition-border duration-500"
+                          >
+                            {state.hasCombatStarted ? (
+                              <CharacterCard
+                                character={{
+                                  id: char.id,
+                                  name: char.name,
+                                  reflexValue: char.reflexValue,
+                                  paPoints: char.paPoints,
+                                  prPoints: char.prPoints,
+                                  life: char.life,
+                                  mana: char.mana,
+                                  stamina: char.stamina,
+                                  died: char.died,
+                                  timer: char.timer,
+                                  ascTimer: char.ascTimer,
+                                }}
+                                changePA={changePA}
+                                changePR={changePR}
+                                changeLife={changeLife}
+                                changeMana={changeMana}
+                                changeStamina={changeStamina}
+                                resetSources={resetSources}
+                                toggleTimer={toggleTimer}
+                                killCharacter={killCharacter}
+                                disabled={!state.hasCombatStarted}
+                                currentTurn={state.turn}
+                              />
+                            ) : (
+                              <SmallCharacterCard
+                                character={{
+                                  id: char.id,
+                                  name: char.name,
+                                  reflexValue: char.reflexValue,
+                                  paPoints: char.paPoints,
+                                  prPoints: char.prPoints,
+                                }}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </div>
+
+                <ToolBar
+                  hasCombatStarted={state.hasCombatStarted}
+                  players={state.characters.length}
+                  toggleCombat={toggleCombat}
+                  resetPoints={resetPoints}
+                  shuffleCharacters={shuffleCharacters}
+                  increaseTurn={increaseTurn}
+                />
+
+                {!state.hasCombatStarted && state.characters.length <= 2 && (
                   <p className="mb-4">
                     Add characters by editing the name and then pressing the (+)
                     sign, once you're over, press the start combat button
                   </p>
                 )}
-                {!state.hasCombatStarted &&  (<PlusCard addFn={addCharacter} />)}
-
-                {state.characters.map((char: Character, index: number) => (
-                  <Draggable
-                    key={char.id}
-                    draggableId={char.id}
-                    index={index}
-                  >
-                    {(
-                      provided: DraggableProvided,
-                      snapshot: DraggableStateSnapshot
-                    ) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={getItemStyle(
-                          snapshot.isDragging,
-                          provided.draggableProps.style
-                        )}
-                        className="mb-4 transition-shadow transition-border duration-500"
-                      >
-                        {state.hasCombatStarted ? (
-                          <CharacterCard
-                            character={{
-                              id: char.id,
-                              name: char.name,
-                              reflexValue: char.reflexValue,
-                              paPoints: char.paPoints,
-                              prPoints: char.prPoints,
-                              life: char.life,
-                              mana: char.mana,
-                              stamina: char.stamina,
-                            }}
-                            changePA={changePA}
-                            changePR={changePR}
-                            changeLife={changeLife}
-                            changeMana={changeMana}
-                            changeStamina={changeStamina}
-                            resetSources={resetSources}
-                            disabled={!state.hasCombatStarted}
-                          />
-                        ) : (
-                          <SmallCharacterCard
-                            character={{
-                              id: char.id,
-                              name: char.name,
-                              reflexValue: char.reflexValue,
-                              paPoints: char.paPoints,
-                              prPoints: char.prPoints,
-                            }}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-
-              <ToolBar hasCombatStarted={state.hasCombatStarted} toggleCombat={toggleCombat} />
               </>
             )}
           </Droppable>
@@ -449,7 +540,9 @@ const App = () => {
 
       {/* Footer */}
       <footer className="bg-stone-950 py-4 px-4 flex justify-center">
-        <p>some random text</p>
+        <a href="https://github.com/sebastianpennino" title="author">
+          By Cronos © {currentYear}
+        </a>
         {/* 
         {state.hasCombatStarted ? (
           <>

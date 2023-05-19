@@ -39,6 +39,9 @@ export const getFakeCharacterCardData = (count: number) => {
     life: 0,
     mana: 0,
     stamina: 0,
+    died: false,
+    timer: 0,
+    ascTimer: 0,
   }));
 };
 
