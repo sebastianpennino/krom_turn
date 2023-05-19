@@ -46,8 +46,8 @@ type AppState = {
 };
 
 const initialState: AppState = {
-  characters: getFakeCharacterCardData(10), //[],
-  hasCombatStarted: true,
+  characters: [], // getFakeCharacterCardData(10),
+  hasCombatStarted: false,
 };
 
 export enum TurnTrackerAction {
@@ -368,6 +368,7 @@ const App = () => {
               provided: DroppableProvided,
               snapshot: DroppableStateSnapshot
             ) => (
+              <>
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
@@ -379,8 +380,7 @@ const App = () => {
                     sign, once you're over, press the start combat button
                   </p>
                 )}
-                {/* <PlusCard addFn={addCharacter} /> */}
-                <ToolBar />
+                {!state.hasCombatStarted &&  (<PlusCard addFn={addCharacter} />)}
 
                 {state.characters.map((char: Character, index: number) => (
                   <Draggable
@@ -439,6 +439,9 @@ const App = () => {
                 ))}
                 {provided.placeholder}
               </div>
+
+              <ToolBar hasCombatStarted={state.hasCombatStarted} toggleCombat={toggleCombat} />
+              </>
             )}
           </Droppable>
         </DragDropContext>
@@ -446,6 +449,8 @@ const App = () => {
 
       {/* Footer */}
       <footer className="bg-stone-950 py-4 px-4 flex justify-center">
+        <p>some random text</p>
+        {/* 
         {state.hasCombatStarted ? (
           <>
             <button
@@ -470,6 +475,7 @@ const App = () => {
             Start Combat!
           </button>
         )}
+         */}
       </footer>
     </div>
   );
