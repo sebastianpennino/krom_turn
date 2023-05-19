@@ -170,9 +170,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <div className="w-9/12 p-2">
           <h3 className="text-sm">
             {character.name}{" "}
-            {character.timer > 0
-              ? `(${currentTurn - character.timer + 1})`
-              : ""}
+            {character.timer > 0 ? `(${currentTurn - character.timer})` : ""}
           </h3>
           <div className="mt-2 space-x-2 text-sm flex">
             <button
