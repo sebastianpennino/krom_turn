@@ -3,9 +3,6 @@ import React from "react";
 export interface Character {
   id: string;
   name: string;
-  reflexValue: number;
-  paPoints: number;
-  prPoints: number;
 }
 
 interface SmallCharacterCardProps {

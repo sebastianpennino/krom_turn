@@ -21,15 +21,6 @@ import { ReactComponent as CheckMarkFillIcon } from "../assets/icon-checkmark-fi
 export interface Character {
   id: string;
   name: string;
-  reflexValue: number;
-  paPoints: number;
-  prPoints: number;
-  life: number;
-  mana: number;
-  stamina: number;
-  died: boolean;
-  timer: number;
-  ascTimer: number;
 }
 
 interface CharacterCardProps {
@@ -55,11 +46,6 @@ export enum PlayerSelection {
 
 const CharacterCard: React.FC<CharacterCardProps> = ({
   character,
-  changePA,
-  changePR,
-  changeLife,
-  changeMana,
-  changeStamina,
   resetSources,
   toggleTimer,
   killCharacter,
@@ -72,24 +58,6 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
     PlayerSelection.NO_SELECTION
   );
 
-  const handleRedClick = () => {
-    changePA(character.id);
-  };
-
-  const handleBlueClick = () => {
-    changePR(character.id);
-  };
-
-  const handleLifeHit = () => {
-    changeLife(character.id);
-  };
-  const handleManaHit = () => {
-    changeMana(character.id);
-  };
-  const handleStaminaHit = () => {
-    changeStamina(character.id);
-  };
-
   const handleReset = () => {
     resetSources(character.id);
   };
@@ -98,12 +66,6 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   };
   const handleKill = () => {
     killCharacter(character.id);
-  };
-
-  const handleExpand = () => {
-    setDisplayMenu(!displayMenu);
-    setSelection(PlayerSelection.NO_SELECTION); // always clear selection
-    setDisplayConfirm(false); // always close sub-menu
   };
 
   const max = 2;
@@ -170,78 +132,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
         <div className="w-9/12 p-2">
           <h3 className="text-sm">
             {character.name}{" "}
-            {character.timer > 0 ? `(${currentTurn - character.timer})` : ""}
           </h3>
-          <div className="mt-2 space-x-2 text-sm flex">
-            <button
-              className="bg-rose-800 text-rose-400 py-0 px-0 w-1/6"
-              onClick={handleLifeHit}
-              disabled={disabled}
-            >
-              {character.life}
-            </button>
-            <button
-              className="bg-sky-800 text-sky-400 py-0 px-0 w-1/6"
-              onClick={handleManaHit}
-              disabled={disabled}
-            >
-              {character.mana}
-            </button>
-            <button
-              className="bg-lime-800 text-lime-400 py-0 px-0 w-1/6"
-              onClick={handleStaminaHit}
-              disabled={disabled}
-            >
-              {character.stamina}
-            </button>
-            <button
-              className="bg-stone-800 text-stone-400 py-0 px-8 flex items-center justify-items-center"
-              onClick={handleExpand}
-              disabled={disabled}
-            >
-              <DownOpenIcon />
-            </button>
-          </div>
-        </div>
-        <div className="w-3/12">
-          <div className="flex h-full justify-end">
-            <button
-              className="bg-red-800 h-full flex flex-col justify-around p-2 focus:outline-none rounded-r-none"
-              onClick={handleRedClick}
-              disabled={disabled}
-            >
-              {Array.from({ length: character.paPoints }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-4 w-4 bg-red-600 rounded-full"
-                ></div>
-              ))}
-              {Array.from({ length: max - character.paPoints }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-4 w-4 bg-red-950 rounded-full"
-                ></div>
-              ))}
-            </button>
-            <button
-              className="bg-blue-800 h-full flex flex-col justify-around p-2 focus:outline-none rounded-l-none"
-              onClick={handleBlueClick}
-              disabled={disabled}
-            >
-              {Array.from({ length: character.prPoints }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-4 w-4 bg-blue-600 rounded-full"
-                ></div>
-              ))}
-              {Array.from({ length: max - character.prPoints }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-4 w-4 bg-blue-950 rounded-full"
-                ></div>
-              ))}
-            </button>
-          </div>
         </div>
       </div>
       {displayMenu && (
